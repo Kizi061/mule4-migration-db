@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+	<db:mysql-config name="MySQL_Configuration" host="localhost" port="3306" user="root" password="admin" database="emp" doc:name="MySQL Configuration"/>
+	<sfdc:cached-basic-config name="Salesforce__Basic_Authentication" username="aayasha@abc.com" password="Check4data" securityToken="5zCMGyOMAcJyWZMIfec6L9Xr" doc:name="Salesforce: Basic Authentication"/>
+	<batch:job name="batch-process-app-redoBatch">
+		<batch:input>
+			<poll doc:name="Poll">
+				<fixed-frequency-scheduler frequency="10000"/>
+				<watermark variable="maxAccountID" default-expression="0" selector="MAX" selector-expression="#[payload.ID]"/>
+				<db:select config-ref="MySQL_Configuration" doc:name="Database">
+					<db:parameterized-query><![CDATA[SELECT * FROM company WHERE ID > #[flowVars.maxAccountID]]]></db:parameterized-query>
+				</db:select>
+			</poll>
+		</batch:input>
+		<batch:process-records>
+			<batch:step name="Check-account-exists">
+				<logger level="INFO" doc:name="Logger" message="Check the duplicate data"/>
+				<enricher source="#[payload.size() &gt; 0]" target="#[recordVars.exists]" doc:name="Message Enricher">
+					<sfdc:query config-ref="Salesforce__Basic_Authentication" query="dsql:SELECT Name FROM Account WHERE Name = '#[payload.AccountName]' " doc:name="Salesforce"/>
+				</enricher>
+			</batch:step>
+			<batch:step name="Add-to-salesforce" accept-expression="#[!recordVars.exists]">
+				<dw:transform-message doc:name="Transform Message">
+					<dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+[{
+	Name: payload.AccountName,
+	BillingStreet: payload.Street,
+	BillingCity: payload.City,
+	BillingState: payload.State,
+	BillingPostalCode: payload.Zipcode,
+	BillingCountry: payload.Country
+}]]]></dw:set-payload>
+				</dw:transform-message>
+				<sfdc:create config-ref="Salesforce__Basic_Authentication" type="Account" doc:name="Salesforce">
+					<sfdc:objects ref="#[payload]"/>
+				</sfdc:create>
+				<logger message="Data added to saleforce" level="INFO" doc:name="Logger"/>
+			</batch:step>
+		</batch:process-records>
+		<batch:on-complete>
+			<logger message="Batch process completed" level="INFO" doc:name="Logger"/>
+		</batch:on-complete>
+	</batch:job>
+</mule>
