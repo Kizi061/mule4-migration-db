@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Mule Migratiol Assistant Report</title>
+    <link rel="stylesheet" type="text/css" href="../assets/styles/mulesoft-styles.css">
+    <link rel="stylesheet" type="text/css" href="../assets/styles/tsorter.css">
+</head>
+<body>
+    <div class="mulesoft-topbar">
+        <div class="mulesoft-appbar">
+            <div class="muleicon muleicon-logo"></div>
+            <div class="anypoint-brand">Mule Migration Assistant 1.0.0</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-md-offset-1 sidemenu">
+        <ul class="sidemenu-back">
+            <li><a href="../summary.html">Summary</a></li>
+        </ul>
+    </div>
+    <div class="col-md-8">
+        <h2 class="text-bold">Issues found on: <span class="text-italic text-normal">sfdc.xml</span></h2>
+        <h4 class="text-bold">Description: <span class="text-italic text-normal">Custom types defined in Studio 6 are not migrated to Studio 7.</span></h4>
+        <h4 class="text-bold">Documentation: </h4>
+        <hr>
+        <br>
+            <div class="col-md-12">
+                <h4 class="text-bold">
+                    Line: <span class="text-italic text-normal">211</span>&nbsp;
+                    Column: <span class="text-italic text-normal">52</span>
+                </h4>
+                <br>
+                <pre>&lt;ee:transform doc:name=&quot;Transform Message&quot; metadata:id=&quot;1d3bb8a8-9401-4311-b239-1d6627f4394a&quot;&gt;
+    &lt;ee:message&gt;
+        &lt;ee:set-payload&gt;%dw 2.0 output application/java --- [ { LastName: payload.LastName, FirstName: payload.FirstName, Phone: payload.Phone, Email: payload.Email } ]&lt;/ee:set-payload&gt;
+    &lt;/ee:message&gt;
+&lt;/ee:transform&gt;</pre>
+                <hr>
+            </div>
+            <div class="col-md-12">
+                <h4 class="text-bold">
+                    Line: <span class="text-italic text-normal">136</span>&nbsp;
+                    Column: <span class="text-italic text-normal">52</span>
+                </h4>
+                <br>
+                <pre>&lt;ee:transform doc:name=&quot;Transform Message&quot; metadata:id=&quot;2ebaa03f-fbff-4b5e-b1b7-008604486b98&quot;&gt;
+    &lt;ee:message&gt;
+        &lt;ee:set-payload&gt;%dw 2.0 output application/java --- [ { LastName: payload.LastName, FirstName: payload.FirstName, Phone: payload.Phone } ]&lt;/ee:set-payload&gt;
+    &lt;/ee:message&gt;
+&lt;/ee:transform&gt;</pre>
+                <hr>
+            </div>
+    </div>
+</body>
+</html>

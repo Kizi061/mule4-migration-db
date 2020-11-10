@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+    <munit:config name="sfdc-test-suite" doc:name="MUnit configuration" />
+
+    <munit:test name="sfdc-test-suite-sfdc-contact-FlowTest" description="Test">
+        <munit:behavior>
+            <munit-tools:mock-when processor="salesforce:query" doc:name="Mock">
+                <munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="bd9d7d42-27b7-41be-8a3e-4b33ed8b2c4e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://query_response.dwl')]" mediaType="application/java" />
+				</munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+        <munit:execution>
+            <flow-ref name="sfdc-contact-Flow" doc:name="Flow-ref to sfdc-contact-Flow" />
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that message="Error: Failed to retrive data" doc:name="Assert Not Null Payload" expression="#[payload]" is="#[MunitTools::notNullValue()]" />
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="sfdc-test-suite-sfdc-singleInsert-FlowTest" description="Test">
+        <munit:behavior>
+            <munit-tools:mock-when processor="salesforce:create" doc:name="Mock">
+                
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="7a995280-f86c-409e-bebd-f688d8e2941b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://create_response.dwl')]" mediaType="application/java" />
+				</munit-tools:then-return>
+            </munit-tools:mock-when>
+            <munit-tools:mock-when processor="set-payload" doc:name="Mock">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="doc:name" whereValue="SetPayload" />
+                </munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#['Data Added Successfully']" mediaType="application/java" />
+				</munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+        <munit:execution>
+            <munit:set-event doc:name="Set Event" doc:id="bf9f578a-59aa-4136-a402-e0df5d3fe3f5" >
+				<munit:payload value='{
+    "LastName": "Sam",
+    "FirstName": "Sam",
+    "Phone": "777 (111) 7777"
+  }' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref name="sfdc-singleInsert-Flow" doc:name="Flow-ref to sfdc-singleInsert-Flow" />
+        </munit:execution>
+        <munit:validation>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="eea60545-c423-4cfd-b14f-f1d57da6d1e6" actual="#[payload]" expected='#["Data Added Successfully"]' message="Error: Failed to insert"/>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="sfdc-test-suite-sfdc-upsert-FlowTest" description="Test">
+        <munit:behavior>
+            <munit-tools:mock-when processor="salesforce:upsert" doc:name="Mock">
+                <munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="0690695d-6e91-4e05-ae1f-f408b919bf4a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://upsert_response.dwl')]" mediaType="application/java" />
+				</munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+        <munit:execution>
+            <!--Migration ERROR: Mule 4 does not require transformers anymore. Now that DataWeave is the default expression language most scenarios that required a transformer no longer exist.-->
+            <!--    For more information refer to:-->
+            <!--        * https://docs.mulesoft.com/mule-runtime/4.3/migration-transformers-->
+            <!--        * https://docs.mulesoft.com/mule-runtime/4.3/transform-dataweave-xml-reference-->
+            <!--<byte-array-to-string-transformer xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" doc:name="Byte Array to String" />-->
+            <munit:set-event doc:name="Set Event" doc:id="58ca4b28-c88b-4f97-abe9-60a9a8754fcd" >
+				<munit:payload value='{         
+	"FirstName": "Joe",         
+	"Phone": "(555) 757-6088",         
+	"LastName": "Jess",         
+	"Email": "jess@gmail.com"   
+}' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref name="sfdc-upsert-Flow" doc:name="Flow-ref to sfdc-upsert-Flow" />
+        </munit:execution>
+        <munit:validation>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="9c8bfad4-3660-40ca-a353-5581338972e7" actual="#[payload]" expected="#[output application/java --- readUrl('classpath://upsert_response.json')]" message="Error: Failed to upsert"/>
+        </munit:validation>
+    </munit:test>
+
+</mule>

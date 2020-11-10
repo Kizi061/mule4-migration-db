@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Mule Migratiol Assistant Report</title>
+    <link rel="stylesheet" type="text/css" href="../assets/styles/mulesoft-styles.css">
+    <link rel="stylesheet" type="text/css" href="../assets/styles/tsorter.css">
+</head>
+<body>
+    <div class="mulesoft-topbar">
+        <div class="mulesoft-appbar">
+            <div class="muleicon muleicon-logo"></div>
+            <div class="anypoint-brand">Mule Migration Assistant 1.0.0</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-md-offset-1 sidemenu">
+        <ul class="sidemenu-back">
+            <li><a href="../summary.html">Summary</a></li>
+        </ul>
+    </div>
+    <div class="col-md-8">
+        <h2 class="text-bold">Issues found on: <span class="text-italic text-normal">sfdc.xml</span></h2>
+        <h4 class="text-bold">Description: <span class="text-italic text-normal">The migration of 'sfdc' is not supported.</span></h4>
+        <h4 class="text-bold">Documentation: </h4>
+            <h4><a href="https://docs.mulesoft.com/mule-runtime/4.3/migration-connectors">https://docs.mulesoft.com/mule-runtime/4.3/migration-connectors</a></h4>
+            <h4><a href="https://github.com/mulesoft/mule-migration-assistant/blob/master/docs/user-docs/migration-tool.adoc#unsupported_connectors">https://github.com/mulesoft/mule-migration-assistant/blob/master/docs/user-docs/migration-tool.adoc#unsupported_connectors</a></h4>
+        <hr>
+        <br>
+            <div class="col-md-12">
+                <h4 class="text-bold">
+                    Line: <span class="text-italic text-normal">134</span>&nbsp;
+                    Column: <span class="text-italic text-normal">71</span>
+                </h4>
+                <br>
+                <pre>&lt;sfdc:create config-ref=&quot;Salesforce__Basic_Authentication&quot; type=&quot;Contact&quot; doc:name=&quot;SalesforceCreate1&quot;&gt;
+    &lt;sfdc:objects ref=&quot;#[payload]&quot; /&gt;
+&lt;/sfdc:create&gt;</pre>
+                <hr>
+            </div>
+            <div class="col-md-12">
+                <h4 class="text-bold">
+                    Line: <span class="text-italic text-normal">8</span>&nbsp;
+                    Column: <span class="text-italic text-normal">205</span>
+                </h4>
+                <br>
+                <pre>&lt;sfdc:cached-basic-config name=&quot;Salesforce__Basic_Authentication&quot; username=&quot;aayasha@abc.com&quot; password=&quot;****&quot; securityToken=&quot;5zCMGyOMAcJyWZMIfec6L9Xr&quot; doc:name=&quot;Salesforce: Basic Authentication&quot; /&gt;</pre>
+                <hr>
+            </div>
+            <div class="col-md-12">
+                <h4 class="text-bold">
+                    Line: <span class="text-italic text-normal">209</span>&nbsp;
+                    Column: <span class="text-italic text-normal">71</span>
+                </h4>
+                <br>
+                <pre>&lt;sfdc:upsert config-ref=&quot;Salesforce__Basic_Authentication&quot; externalIdFieldName=&quot;Email&quot; type=&quot;Contact&quot; doc:name=&quot;SalesforceUpsert&quot;&gt;
+    &lt;sfdc:objects ref=&quot;#[payload]&quot; /&gt;
+&lt;/sfdc:upsert&gt;</pre>
+                <hr>
+            </div>
+            <div class="col-md-12">
+                <h4 class="text-bold">
+                    Line: <span class="text-italic text-normal">38</span>&nbsp;
+                    Column: <span class="text-italic text-normal">78</span>
+                </h4>
+                <br>
+                <pre>&lt;sfdc:query config-ref=&quot;Salesforce__Basic_Authentication&quot; query=&quot;dsql:SELECT Id, FirstName, LastName, Phone FROM Contact limit 50&quot; doc:name=&quot;SalesforceQuery&quot; /&gt;</pre>
+                <hr>
+            </div>
+            <div class="col-md-12">
+                <h4 class="text-bold">
+                    Line: <span class="text-italic text-normal">86</span>&nbsp;
+                    Column: <span class="text-italic text-normal">78</span>
+                </h4>
+                <br>
+                <pre>&lt;sfdc:query config-ref=&quot;Salesforce__Basic_Authentication&quot; query=&quot;dsql:SELECT Country,Email,FirstName,LastName,Title FROM Lead limit 50&quot; doc:name=&quot;Salesforce Account Object&quot; /&gt;</pre>
+                <hr>
+            </div>
+    </div>
+</body>
+</html>

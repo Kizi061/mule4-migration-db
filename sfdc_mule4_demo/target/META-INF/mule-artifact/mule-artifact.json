@@ -1,0 +1,34 @@
+{
+  "configs": [
+    "sfdc.xml"
+  ],
+  "secureProperties": [],
+  "redeploymentEnabled": true,
+  "name": "org.mule.migrated:sfdc:1.0.0-M4-SNAPSHOT",
+  "minMuleVersion": "4.3.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "catalog/1d3bb8a8-9401-4311-b239-1d6627f4394a__md_message_processor__.json",
+        "catalog/2ebaa03f-fbff-4b5e-b1b7-008604486b98__md_message_processor__.json",
+        "catalog/Salesforce__Basic_Authentication__md__io__.xml",
+        "catalog/types/custom/contact_JSON__md__custom_type__.xml",
+        "catalog/types/Salesforce__Basic_Authentication__md__type__.xml",
+        "Examples/create_Contact.json",
+        "Examples/create_multiContacts.json",
+        "log4j2.xml",
+        "migration/attributes2inboundProperties.dwl",
+        "migration/HttpListener.dwl",
+        "mule-app.properties",
+        "sfdc.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

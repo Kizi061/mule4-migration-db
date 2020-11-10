@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:compatibility="http://www.mulesoft.org/schema/mule/compatibility" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd http://www.mulesoft.org/schema/mule/compatibility http://www.mulesoft.org/schema/mule/compatibility/current/mule-compatibility.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+
+    <http:listener-config name="HTTP_Listener_Configuration" doc:name="HTTP Listener Configuration">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+
+    <salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="3ad8a942-9be6-4f0a-ab63-8c311be5a120" >
+		<salesforce:basic-connection username="aayasha@abc.com" password="Check4data" securityToken="5zCMGyOMAcJyWZMIfec6L9Xr" />
+	</salesforce:sfdc-config>
+	<flow name="sfdc-contact-Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/sfdcContact" allowedMethods="GET" doc:name="GET /sfdcContact">
+            <http:response statusCode="#[migration::HttpListener::httpListenerResponseSuccessStatusCode(vars)]">
+                <!--Migration WARN: Avoid using an outbound property to determine the status code.-->
+                <!--    For more information refer to:-->
+                <!--        * https://github.com/mulesoft/mule-migration-assistant/blob/master/docs/user-docs/migration-tool-post-mig.adoc#outbound_properties-->
+                <http:headers>#[migration::HttpListener::httpListenerResponseHeaders(vars)]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.statusCode default migration::HttpListener::httpListenerResponseErrorStatusCode(vars)]">
+                <!--Migration WARN: Avoid using an outbound property to determine the status code.-->
+                <!--    For more information refer to:-->
+                <!--        * https://github.com/mulesoft/mule-migration-assistant/blob/master/docs/user-docs/migration-tool-post-mig.adoc#outbound_properties-->
+                <http:headers>#[migration::HttpListener::httpListenerResponseHeaders(vars)]</http:headers>
+            </http:error-response>
+        </http:listener>
+
+        <logger message="sfdc flow started" level="INFO" doc:name="Logger" />
+
+        <salesforce:query doc:name="Query" doc:id="bd9d7d42-27b7-41be-8a3e-4b33ed8b2c4e" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id, FirstName, LastName, Phone FROM Contact limit 50]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Object to JSON">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0 
+output application/json 
+--- 
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <logger message="sfdc flow completed" level="INFO" doc:name="Logger" />
+
+    </flow>
+
+    <flow name="sfdc-account-Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/sfdcLead" allowedMethods="GET" doc:name="GET /sfdcLead">
+            <http:response statusCode="#[migration::HttpListener::httpListenerResponseSuccessStatusCode(vars)]">
+                <!--Migration WARN: Avoid using an outbound property to determine the status code.-->
+                <!--    For more information refer to:-->
+                <!--        * https://github.com/mulesoft/mule-migration-assistant/blob/master/docs/user-docs/migration-tool-post-mig.adoc#outbound_properties-->
+                <http:headers>#[migration::HttpListener::httpListenerResponseHeaders(vars)]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.statusCode default migration::HttpListener::httpListenerResponseErrorStatusCode(vars)]">
+                <!--Migration WARN: Avoid using an outbound property to determine the status code.-->
+                <!--    For more information refer to:-->
+                <!--        * https://github.com/mulesoft/mule-migration-assistant/blob/master/docs/user-docs/migration-tool-post-mig.adoc#outbound_properties-->
+                <http:headers>#[migration::HttpListener::httpListenerResponseHeaders(vars)]</http:headers>
+            </http:error-response>
+        </http:listener>
+
+        <logger message="sfdc flow started" level="INFO" doc:name="Logger" />
+
+        <salesforce:query doc:name="Query" doc:id="98e9c3e2-adb2-487f-bfe4-d6e79c961d5c" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Country,Email,FirstName,LastName,Title FROM Lead limit 50]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Object to JSON">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0 
+output application/json
+--- 
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <logger message="sfdc flow completed" level="INFO" doc:name="Logger" />
+
+    </flow>
+
+    <flow name="sfdc-singleInsert-Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/sfdcContact" allowedMethods="POST" doc:name="POST /sfdcContact">
+            <http:response statusCode="#[migration::HttpListener::httpListenerResponseSuccessStatusCode(vars)]">
+                <!--Migration WARN: Avoid using an outbound property to determine the status code.-->
+                <!--    For more information refer to:-->
+                <!--        * https://github.com/mulesoft/mule-migration-assistant/blob/master/docs/user-docs/migration-tool-post-mig.adoc#outbound_properties-->
+                <http:headers>#[migration::HttpListener::httpListenerResponseHeaders(vars)]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.statusCode default migration::HttpListener::httpListenerResponseErrorStatusCode(vars)]">
+                <!--Migration WARN: Avoid using an outbound property to determine the status code.-->
+                <!--    For more information refer to:-->
+                <!--        * https://github.com/mulesoft/mule-migration-assistant/blob/master/docs/user-docs/migration-tool-post-mig.adoc#outbound_properties-->
+                <http:headers>#[migration::HttpListener::httpListenerResponseHeaders(vars)]</http:headers>
+            </http:error-response>
+        </http:listener>
+
+        <set-payload value="#[payload]" mimeType="application/json" />
+
+        <ee:transform doc:name="Transform Message">
+            <!--Migration ERROR: Custom types defined in Studio 6 are not migrated to Studio 7.-->
+            <ee:message>
+                <ee:set-payload>%dw 2.0
+output application/java  
+---
+[
+  {
+    LastName: payload.LastName,
+    FirstName: payload.FirstName,
+    Phone: payload.Phone
+  }
+]</ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <salesforce:create doc:name="Create" doc:id="7a995280-f86c-409e-bebd-f688d8e2941b" config-ref="Salesforce_Config" type="Contact"/>
+		<logger message="#[payload]" level="INFO" doc:name="Logger" />
+
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json  
+---
+{
+  id: payload.items[0].id,
+  success: payload.items[0].successful
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <set-payload value="#['Data Added Successfully']" mimeType="application/json" doc:name="SetPayload" />
+
+        <logger message="New data added to the Contact Object" level="INFO" doc:name="Logger" />
+
+    </flow>
+
+    <flow name="sfdc-upsert-Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/sfdcMultiContact" allowedMethods="POST" doc:name="POST /sfdcMultiContact">
+            <http:response statusCode="#[migration::HttpListener::httpListenerResponseSuccessStatusCode(vars)]">
+                <!--Migration WARN: Avoid using an outbound property to determine the status code.-->
+                <!--    For more information refer to:-->
+                <!--        * https://github.com/mulesoft/mule-migration-assistant/blob/master/docs/user-docs/migration-tool-post-mig.adoc#outbound_properties-->
+                <http:headers>#[migration::HttpListener::httpListenerResponseHeaders(vars)]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.statusCode default migration::HttpListener::httpListenerResponseErrorStatusCode(vars)]">
+                <!--Migration WARN: Avoid using an outbound property to determine the status code.-->
+                <!--    For more information refer to:-->
+                <!--        * https://github.com/mulesoft/mule-migration-assistant/blob/master/docs/user-docs/migration-tool-post-mig.adoc#outbound_properties-->
+                <http:headers>#[migration::HttpListener::httpListenerResponseHeaders(vars)]</http:headers>
+            </http:error-response>
+        </http:listener>
+
+        <set-payload value="#[payload]" mimeType="application/json" />
+
+        <ee:transform doc:name="Transform Message">
+            <!--Migration ERROR: Custom types defined in Studio 6 are not migrated to Studio 7.-->
+            <ee:message>
+                <ee:set-payload>%dw 2.0
+output application/java  
+---
+[
+  {
+    LastName: payload.LastName,
+    FirstName: payload.FirstName,
+    Phone: payload.Phone,
+    Email: payload.Email
+  }
+]</ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <salesforce:upsert doc:name="Upsert" doc:id="0690695d-6e91-4e05-ae1f-f408b919bf4a" config-ref="Salesforce_Config" objectType="Contact" externalIdFieldName="Email"/>
+		<logger message="#[payload]" level="INFO" doc:name="Logger" />
+
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json  
+---
+{
+  id: payload.items[0].id,
+  success: payload.items[0].successful
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <logger message="#[payload]" level="INFO" doc:name="Logger" />
+
+        <logger message="#['Upsert Flow completed']" level="INFO" doc:name="Logger" />
+
+    </flow>
+
+</mule>
